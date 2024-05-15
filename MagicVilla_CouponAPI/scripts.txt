@@ -1,0 +1,54 @@
+skP8Q~qpVUzRmFPSXC5Igw-pHWEfxWcdeaW7RaRV
+
+docker build -t magic-villa:v1 -f .\Dockerfile .
+
+// only to test in local machine
+docker run -p 8083:80 -e ASPNETCORE_URLS=http://+:80 --name magic-villa-v3 magic-villa:v3
+
+az aks create `
+--subscription 08b79b79-bbe9-4818-baca-a322d4682190 `
+--resource-group AksPlayground `
+--name AksPlayground `
+--enable-addons monitoring,http_application_routing `
+--kubernetes-version 1.29 `
+--generate-ssh-keys `
+--service-principal 22abf76d-c962-4992-a179-f61667e3b6d1 `
+--client-secret skP8Q~qpVUzRmFPSXC5Igw-pHWEfxWcdeaW7RaRV `
+--node-count 3 `
+--vm-set-type VirtualMachineScaleSets `
+--load-balancer-sku standard `
+--enable-cluster-autoscaler `
+--min-count 1 `
+--max-count 5
+
+
+az aks get-credentials `
+--subscription 08b79b79-bbe9-4818-baca-a322d4682190 `
+--resource-group AksPlayground `
+--name AksPlayground
+
+
+az acr create `
+--subscription 08b79b79-bbe9-4818-baca-a322d4682190 `
+--resource-group AksPlayground `
+--name aksplaygroundacr `
+--sku Basic `
+--admin-enabled true
+
+az acr build `
+--subscription 08b79b79-bbe9-4818-baca-a322d4682190 `
+--registry aksplaygroundacr `
+--image magic-villa:latest .
+
+az acr show `
+--subscription 08b79b79-bbe9-4818-baca-a322d4682190 `
+--resource-group AksPlayground `
+--name aksplaygroundacr `
+--query "id"
+
+
+az role assignment create `
+--subscription 08b79b79-bbe9-4818-baca-a322d4682190 `
+--assignee 22abf76d-c962-4992-a179-f61667e3b6d1 `
+--role acrpull `
+--scope "/subscriptions/08b79b79-bbe9-4818-baca-a322d4682190/resourceGroups/AksPlayground/providers/Microsoft.ContainerRegistry/registries/aksplaygroundacr"

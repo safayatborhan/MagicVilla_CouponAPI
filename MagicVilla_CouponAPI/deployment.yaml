@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: magic-villa
+spec:
+  selector:
+      matchLabels:
+        app: magic-villa
+  replicas: 3
+  template:
+      metadata:
+        labels:
+            app: magic-villa
+      spec:
+        containers:
+        - name: magic-villa
+          image: aksplaygroundacr.azurecr.io/magic-villa:v3
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http-web-api
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          env:
+            - name: ASPNETCORE_URLS
+              value: http://+:80  
